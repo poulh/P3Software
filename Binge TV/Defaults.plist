@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>TVDB</key>
+	<dict>
+		<key>API Key</key>
+		<string>70BE8DAF03F45D4A</string>
+		<key>User Key</key>
+		<string>BDBDFA3DBD54B00C</string>
+		<key>User Name</key>
+		<string>phornsleth</string>
+	</dict>
+	<key>Transmission</key>
+	<dict>
+		<key>Host</key>
+		<string>127.0.0.1</string>
+		<key>Port</key>
+		<integer>9091</integer>
+	</dict>
+	<key>Downloads Manager</key>
+	<dict>
+		<key>Video Extensions</key>
+		<array>
+			<string>avi</string>
+			<string>mkv</string>
+			<string>mp4</string>
+		</array>
+		<key>Filename Regex</key>
+		<array>
+			<string>[sS](\d{1,2})[eE](\d{1,2})</string>
+			<string>(\d{1,2})x(\d{1,2})</string>
+		</array>
+		<key>Subtitle Extensions</key>
+		<array>
+			<string>srt</string>
+		</array>
+		<key>Media Directory Name</key>
+		<string>Binge TV</string>
+	</dict>
+</dict>
+</plist>

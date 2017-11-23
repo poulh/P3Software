@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>Card Maker.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>Pandora Desktop.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
+		<key>Pandora Extension.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
+		<key>Risk View 2.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>5</integer>
+		</dict>
+		<key>Risk View.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
+		<key>RiskView.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
+		<key>TV Practice 2.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
+		<key>TV Practice.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
+		<key>TvTime.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>0</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>BA08D8E51FB4DD45000709EA</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BA08D8FA1FB4DD45000709EA</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BA08D9051FB4DD45000709EA</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BAA0685E1FBDEFAF00DB1997</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BAA068731FBDEFAF00DB1997</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BAA0687E1FBDEFB000DB1997</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BAD429D81FC3A4AB00B74883</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BAED9B1B1FAB921A00CD8DA5</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BAED9B2C1FAB921B00CD8DA5</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BAED9B371FAB921B00CD8DA5</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BAF115321FC09EA800681C75</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>
