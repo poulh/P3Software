@@ -367,9 +367,17 @@ class DownloadsManager: NSObject {
         self.updateDownloadDirectory()
     }
     
-    init?( mediaDirectoryURL: URL, downloadRegexes: Array<String>, videoExtensions: Array<String>, subtitleExtensions: Array<String> )
+    init?( defaults: UserDefaults)
     {
-        self.mediaDirectoryURL = mediaDirectoryURL
+        print(defaults.object(forKey: MEDIA_ACTUAL_DIRECTORY))
+        print(defaults.url(forKey: MEDIA_ACTUAL_DIRECTORY))
+        guard let actualMediaDirectory = defaults.url(forKey: MEDIA_ACTUAL_DIRECTORY )
+            else {
+                print("no actual")
+                return nil
+        }
+        self.mediaDirectoryURL = actualMediaDirectory
+ 
         do
         {
             try fileManager.createDirectory(at: self.mediaDirectoryURL, withIntermediateDirectories: true, attributes: nil)
@@ -379,17 +387,24 @@ class DownloadsManager: NSObject {
             return nil
         }
         
-        for ext in videoExtensions
+        guard let video_extensions = defaults.array(forKey: VIDEO_EXTENSIONS ) as? [String],
+            let subtitle_extensions = defaults.array( forKey: SUBTITLE_EXTENSIONS ) as? [String],
+            let filename_regex = defaults.array(forKey: FILENAME_REGEX ) as? [String]
+            else {
+                return nil
+        }
+        
+        for ext in video_extensions
         {
             EpisodeFile.videoExtensions.insert( ext )
         }
         
-        for ext in subtitleExtensions
+        for ext in subtitle_extensions
         {
             EpisodeFile.subtitleExtensions.insert( ext )
         }
         
-        EpisodeFile.regexes = downloadRegexes
+        EpisodeFile.regexes = filename_regex
         
         if( !self.fileManager.fileExists(atPath: self.mediaDirectoryURL.relativePath ) )
         {

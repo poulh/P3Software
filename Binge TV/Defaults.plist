@@ -11,11 +11,11 @@
 		<key>User Name</key>
 		<string>phornsleth</string>
 	</dict>
-	<key>Transmission</key>
+	<key>Downloader</key>
 	<dict>
-		<key>Host</key>
+		<key>Transmission Host</key>
 		<string>127.0.0.1</string>
-		<key>Port</key>
+		<key>Transmission Port</key>
 		<integer>9091</integer>
 	</dict>
 	<key>Downloads Manager</key>

@@ -29,9 +29,8 @@ class ViewController: NSViewController {
     let seasonGroupingHelper = SeasonGroupingHelper()
     var seriesColorAnalyzer : ColorAnalyzer?
     let mediaDirectoryHelper = MediaDirectoryHelper()
-    
+        
     //data fetchers
-    let userDefaults = UserDefaults.standard
     var tvdb: TVDB?
     var eztv: EZTV?
     var transmission: Transmission?
@@ -61,35 +60,7 @@ class ViewController: NSViewController {
         }
     }
     
-    func getMediaDirectoryURL( mediaDirectoryURL: URL? ) -> [String:URL?]
-    {
-        let helper = MediaDirectoryHelper()
-        if let url = mediaDirectoryURL
-        {
-            print( "url valid: \(url)")
-            if let actualURL = helper.getActualURL( fromDisplayURL: url )
-            {
-                print( "actual \(actualURL)")
-                return [ "display" : url, "actual" : actualURL ]
-            }
-        }
-        
-        var url : URL? = nil
-        self.displayOpenPanel(window: self.window, title: "Please Select Media Directory") { (chosenURL: URL?) in
-            url = chosenURL
-        }
-
-        if let u = url
-        {
-            print( u )
-            let displayURL = helper.getDisplayURL(url: u)
-            print( "display \(displayURL )" )
-            return [ "display":displayURL, "actual":u ]
-        }
-        
-        return ["display":nil,"actual":nil]
-    }
-    
+   
     
   
     
@@ -169,44 +140,6 @@ class ViewController: NSViewController {
      */
     
     
-    func displayOpenPanel( window: NSWindow?, title: String, callback:@escaping (URL?)-> () )
-    {
-        let panel = NSOpenPanel()
-        
-        panel.title                   = title
-        panel.showsResizeIndicator    = true
-        panel.showsHiddenFiles        = false
-        panel.canChooseDirectories    = true
-        panel.canChooseFiles          = false
-        panel.canCreateDirectories    = true
-        panel.allowsMultipleSelection = false
-        
-        
-//        if let win = window
-//        {
-//            print( "begin sheet")
-//            panel.beginSheet( win, completionHandler: { (response:NSModalResponse) in
-//
-//            })
-//        }
-//        else
-       // {
-            print( "modal")
-            if( panel.runModal() != NSApplication.ModalResponse.OK )
-            {
-                
-            }
-        //}
-        
-        if let url = panel.url
-        {
-            callback( url )
-            return
-        }
-        callback( nil )
-        return
-    }
-    
     func displayAlert( window: NSWindow?, message: String, buttonTitle: String,  callback:@escaping (Bool)-> () )
     {
         let alert = NSAlert()
@@ -234,14 +167,34 @@ class ViewController: NSViewController {
     }
     
     override func viewWillAppear() {
-        print(" view wil appear")
+        print(" view will appear")
         super.viewWillAppear()
-        self.seriesTableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        if( !self.series.isEmpty )
+        {
+            self.seriesTableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        }
+    }
+    
+    func getTVDBSeries() -> [TVDB.Series]?
+    {
+        guard let seriesData = UserDefaults.standard.object(forKey: TVDB_SERIES) as? Data,
+                    let series = NSKeyedUnarchiver.unarchiveObject(with: seriesData) as? [TVDB.Series]
+                        else {
+                            return nil
+                    }
+                    return series
+    }
+    
+    func setTVDBSeries( series: [TVDB.Series] )
+    {
+        let data = NSKeyedArchiver.archivedData(withRootObject: series )
+        UserDefaults.standard.set( data, forKey: TVDB_SERIES )
     }
     
     override func viewDidLoad()
     {
         print("view did load")
+        super.viewDidLoad()
         
         guard let defaultsPath = Bundle.main.path(forResource: "Defaults", ofType: "plist"),
             let defaultsProperties = NSDictionary(contentsOfFile: defaultsPath )
@@ -261,9 +214,9 @@ class ViewController: NSViewController {
             let apiKey = tvdbDict.value( forKey: "API Key" ) as? String,
             let userKey = tvdbDict.value( forKey: "User Key" ) as? String,
             let userName = tvdbDict.value( forKey: "User Name" ) as? String,
-            let transmissionDict = defaultsProperties.value( forKey: "Transmission" ) as? NSDictionary,
-            let host = transmissionDict.value( forKey: "Host" ) as? String,
-            let port = transmissionDict.value( forKey: "Port" ) as? Int
+            let transmissionDict = defaultsProperties.value( forKey: "Downloader" ) as? NSDictionary,
+            let transmissionHost = transmissionDict.value( forKey: "Transmission Host" ) as? String,
+            let transmissionPort = transmissionDict.value( forKey: "Transmission Port" ) as? Int
             else {
                 displayAlert( window: self.window, message: "The file: \(defaultsPath) is corrupt.\n\nPlease contact the developer.", buttonTitle: "Quit", callback: { (success:Bool) in
                     NSApplication.shared.terminate(self)
@@ -271,58 +224,61 @@ class ViewController: NSViewController {
                 return
         }
         
-        let mediaDisplayURL = self.userDefaults.url( forKey: "Media Display Directory")
-        var mediaDirectoryURLs : [String:URL?] = self.getMediaDirectoryURL( mediaDirectoryURL: mediaDisplayURL )
         
-        for (key,value) in mediaDirectoryURLs
-        {
-            if let url = value
+        UserDefaults.standard.register( defaults: ["Video Extensions" : videoExtensions,
+                                                   "Subtitle Extensions" : subtitleExtensions,
+                                                   "Filename Regex" : downloadRegexes,
+                                                   MEDIA_DIRECTORY_NAME : mediaDirectoryName,
+                                                   "Transmission Host" : transmissionHost,
+                                                   "Transmission Port" : transmissionPort ] )
+
+        NotificationCenter.default.addObserver(forName: UserDefaults.didChangeNotification, object: nil, queue: nil) { (notification:Notification) in
+            print("defaults changed")
+            
+            guard let downloadsManager = DownloadsManager( defaults: UserDefaults.standard )
+                else {
+                 
+                    return
+            }
+            
+            self.downloadsManager = downloadsManager
+            
+            if let transmission = Transmission(host: transmissionHost, port: transmissionPort)
             {
-                if( url.lastPathComponent != mediaDirectoryName )
-                {
-                    mediaDirectoryURLs[ key ] = url.appendingPathComponent(mediaDirectoryName)
-                }
+                self.transmission = transmission
+                transmission.authenticate( callback: { (authenticated: Bool ) -> () in
+                    if( authenticated )
+                    {
+                        print( "transmission authenticated")
+                        
+                        downloadsManager.setTransmission(transmission: transmission)
+                        
+                        transmission.getSession( callback: { (session: Transmission.Session ) -> () in
+                            downloadsManager.setDownloadsDirectory(path: session.download_dir)
+                            //downloadsManager.updateDownloadDirectory()
+                            downloadsManager.catalogDownloads(series: self.series )
+                            
+                            DispatchQueue.main.async(){
+                                self.updateDownloadsTableView()
+                            }
+                        })
+                    }
+                    else
+                    {
+                        print( "couldn't auth transmission")
+                    }
+                })
             }
             else
             {
-                displayAlert( window: self.window, message: "Could Not Create Media Directory", buttonTitle: "Quit", callback: { (success:Bool) in
-                    NSApplication.shared.terminate(self)
-                })
-                return
+                print("no transmission")
             }
+            
+            self.seasonGroupingHelper.reset()
+            self.episodesTableView.reloadData()
         }
         
-        guard let actualMediaURL = mediaDirectoryURLs["actual"] as? URL,
-            let displayMediaURL = mediaDirectoryURLs["display"] as? URL
-            else {
-                displayAlert( window: self.window, message: "Could Not Create Media Directory", buttonTitle: "Quit", callback: { (success:Bool) in
-                    NSApplication.shared.terminate(self)
-                })
-                return
-        }
-        
-        print("saving")
-        print( displayMediaURL)
-        print( actualMediaURL)
-        self.userDefaults.set( displayMediaURL, forKey: "Media Display Directory")
-        
-        guard let downloadsManager = DownloadsManager( mediaDirectoryURL: actualMediaURL, downloadRegexes: downloadRegexes, videoExtensions: videoExtensions, subtitleExtensions: subtitleExtensions )
-            else {
-                displayAlert( window: self.window, message: "Error creating Download Manager.\n\nPlease contact the developer.", buttonTitle: "Quit", callback: { (success:Bool) in
-                    NSApplication.shared.terminate(self)
-                })
-                return
-        }
-        
-        self.downloadsManager = downloadsManager
-
-        if let eztv = EZTV()
-        {
-            self.eztv = eztv
-            self.eztv?.search( callback: { (result: EZTV.Result) in
-                print("search done")
-            })
-        }
+     
         
         if let tvdb = TVDB(apiKey: apiKey, userKey: userKey, userName: userName)
         {
@@ -349,57 +305,36 @@ class ViewController: NSViewController {
             
         }
         
-        //self.searchResultsScrollView.isHidden = true
-        if let seriesData = self.userDefaults.object(forKey: "series") as? Data
-        {
-            if let series = NSKeyedUnarchiver.unarchiveObject(with: seriesData) as? [TVDB.Series]
-            {
-                self.series = series
-         //       self.seriesTableView.reloadData()
-                
-            }
-            
-            print("done loading keyed data: \(self.series.count)")
-            
-        }
-        else
-        {
-            //
-            //            print("could not load series")
+        let defaults = UserDefaults.standard
+        
+        guard let mediaDirectoryInfo = self.mediaDirectoryHelper.getMediaDirectoryURL( displayDirectoryURL: defaults.url(forKey: MEDIA_DISPLAY_DIRECTORY ), mediaDirectoryName: defaults.string(forKey: MEDIA_DIRECTORY_NAME )! )
+            else {
+                displayAlert( window: self.window, message: "Could Not Create Media Directory", buttonTitle: "Quit", callback: { (success:Bool) in
+                    NSApplication.shared.terminate(self)
+                })
+                return
         }
         
-        // self.downloadsTableView.backgroundColor = NSColor.underPageBackgroundColor
+        defaults.set(mediaDirectoryInfo.displayURL, forKey: MEDIA_DISPLAY_DIRECTORY)
+        defaults.set(mediaDirectoryInfo.actualURL, forKey: MEDIA_ACTUAL_DIRECTORY )
         
-        if let transmission = Transmission(host: host, port: port)
+        if( self.downloadsManager == nil )
         {
-            self.transmission = transmission
-            transmission.authenticate( callback: { (authenticated: Bool ) -> () in
-                if( authenticated )
-                {
-                    print( "transmission authenticated")
-                    
-                    downloadsManager.setTransmission(transmission: transmission)
-                    
-                    transmission.getSession( callback: { (session: Transmission.Session ) -> () in
-                        downloadsManager.setDownloadsDirectory(path: session.download_dir)
-                        //downloadsManager.updateDownloadDirectory()
-                        downloadsManager.catalogDownloads(series: self.series )
-                        
-                        DispatchQueue.main.async(){
-                            self.updateDownloadsTableView()
-                        }
-                    })
-                }
-                else
-                {
-                    print( "couldn't auth transmission")
-                }
+            self.displayAlert( window: self.window, message: "Error creating Download Manager.\n\nPlease contact the developer.", buttonTitle: "Quit", callback: { (success:Bool) in
+                NSApplication.shared.terminate(self)
             })
         }
-        else
+        
+        if let series = getTVDBSeries()
         {
-            print("no transmission")
+            self.series = series
         }
+        
+        
+        
+     
+      
+        
        /*
         downloadsManager.scheduleTransmissionTimer { (numRemoved:Int) in
             
@@ -413,7 +348,6 @@ class ViewController: NSViewController {
             }
         }
      */
-        super.viewDidLoad()
 
         
     }
@@ -444,8 +378,7 @@ class ViewController: NSViewController {
     func removeSeries( row: Int )
     {
         self.series.remove( at: row )
-        let data = NSKeyedArchiver.archivedData( withRootObject: self.series )
-        self.userDefaults.set( data, forKey: "series" )
+        setTVDBSeries(series: self.series)
         self.seriesTableView.reloadData()
         self.episodesTableView.reloadData()
         if( self.series.count > 0 )
@@ -549,8 +482,7 @@ class ViewController: NSViewController {
                         return myLhs < myRhs
                     })
                     
-                    let data = NSKeyedArchiver.archivedData(withRootObject: self.series)
-                    self.userDefaults.set( data, forKey: "series")
+                    self.setTVDBSeries(series: self.series )
                     
                     self.searchResults = []
                     
@@ -582,18 +514,6 @@ extension ViewController: NSTableViewDataSource {
                 
                 let noDataLabel = NSTextView(frame: tableView.bounds )
                 noDataLabel.string = "No Series Added"
-                /*
-                 UILabel *noDataLabel         = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, self.tableView.bounds.size.height)];
-                 noDataLabel.text             = @"No data available";
-                 noDataLabel.textColor        = [UIColor blackColor];
-                 noDataLabel.textAlignment    = NSTextAlignmentCenter;
-                 */
-                //yourTableView.backgroundView = noDataLabel;
-                //yourTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-                //tableView.bac
-                //   tableView.backgroundView = noDataLabel;
-                // tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-                // }
             }
             return self.series.count
         }
@@ -887,6 +807,7 @@ extension ViewController: NSTableViewDelegate {
         if let tableView = notification.object as? NSTableView {
             if( tableView == self.seriesTableView )
             {
+                print( tableView.selectedRow)
                 if( tableView.selectedRow >= 0 )
                 {
                     self.seasonGroupingHelper.reset()
@@ -894,6 +815,29 @@ extension ViewController: NSTableViewDelegate {
                     self.displaySearchResults = false
                     episodesTableView.scrollRowToVisible(0)
                     episodesTableView.reloadData()
+                    
+                    let series = self.series[ tableView.selectedRow ]
+                    
+                    if let eztv = EZTV()
+                    {
+                        self.eztv = eztv
+                        eztv.search(series: series.name,
+                                    seasonNumber: 1, episodeNumber: 1,
+                                    resolution: EZTV.RESOLUTION_720P,
+                            callback: { (results: [EZTV.Result]?) in
+                            guard let results = results
+                                else {
+                                    print("no results")
+                                    return
+                            }
+                            for result in results
+                            {
+                                print("--------")
+                                print( result.title)
+                                print( result.magnetURL)
+                            }
+                        })
+                    }
                 }
             }
         }

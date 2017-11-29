@@ -10,6 +10,47 @@ import Cocoa
 
 class MediaDirectoryHelper : NSObject
 {
+    struct MediaDirectoryInfo
+    {
+        init( actualURL: URL, displayURL: URL )
+        {
+            self.actualURL = actualURL
+            self.displayURL = displayURL
+        }
+        var actualURL : URL
+        var displayURL : URL
+    }
+    
+    func getMediaDirectoryURL( displayDirectoryURL: URL?, mediaDirectoryName: String ) -> MediaDirectoryInfo?
+    {
+        //let helper = MediaDirectoryHelper()
+        if let url = displayDirectoryURL
+        {
+            print( "url valid: \(url)")
+            if let actualURL = self.getActualURL( fromDisplayURL: url )
+            {
+                print( "actual \(actualURL)")
+                return MediaDirectoryInfo( actualURL: actualURL, displayURL: url )
+            }
+        }
+        
+        var rval : MediaDirectoryInfo? = nil
+        self.displayOpenPanel( title: "Please Select Media Directory") { (chosenURL: URL?) in
+            if var url = chosenURL
+            {
+                if( url.pathComponents.last != mediaDirectoryName )
+                {
+                    url.appendPathComponent(mediaDirectoryName)
+                }
+                let displayURL = self.getDisplayURL(url: url)
+                print( "display \(displayURL )" )
+                rval = MediaDirectoryInfo( actualURL: url, displayURL: displayURL )
+            }
+        }
+        
+        return rval
+    }
+    
     func getActualURL( fromDisplayURL: URL ) -> URL?
     {
         if( self.directoryExists(url: fromDisplayURL ) )
@@ -129,6 +170,46 @@ class MediaDirectoryHelper : NSObject
         print(u )
         return u
     }
+    
+    
+    private func displayOpenPanel( title: String, callback:@escaping (URL?)-> () )
+    {
+        let panel = NSOpenPanel()
+        
+        panel.title                   = title
+        panel.showsResizeIndicator    = true
+        panel.showsHiddenFiles        = false
+        panel.canChooseDirectories    = true
+        panel.canChooseFiles          = false
+        panel.canCreateDirectories    = true
+        panel.allowsMultipleSelection = false
+        
+        
+        //        if let win = window
+        //        {
+        //            print( "begin sheet")
+        //            panel.beginSheet( win, completionHandler: { (response:NSModalResponse) in
+        //
+        //            })
+        //        }
+        //        else
+        // {
+        print( "modal")
+        if( panel.runModal() != NSApplication.ModalResponse.OK )
+        {
+            
+        }
+        //}
+        
+        if let url = panel.url
+        {
+            callback( url )
+            return
+        }
+        callback( nil )
+        return
+    }
+
 
     private let fileManager = FileManager()
 

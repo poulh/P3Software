@@ -1,0 +1,6 @@
+framework module Pods_Binge_TV {
+  umbrella header "Pods-Binge TV-umbrella.h"
+
+  export *
+  module * { export * }
+}
