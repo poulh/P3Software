@@ -8,7 +8,6 @@
 
 import Cocoa
 
-
 class Transmission: NSObject {
     
     // https://trac.transmissionbt.com/browser/branches/1.7x/doc/rpc-spec.txt
@@ -188,7 +187,6 @@ class Transmission: NSObject {
         
         init?( json: [String:Any] )
         {
-            
             guard let addedDate = json["addedDate"] as? Int ?? diagnose(),
                 let comment = json["comment"] as? String ?? diagnose(),
                 let doneDate = json["doneDate"] as? Int  ?? diagnose(),
@@ -404,6 +402,22 @@ class Transmission: NSObject {
             }
             callback( rval )
         })
+    }
+    
+    func addTorrent( url: URL )
+    {
+        let arguments: [String:Any] = ["filename":url.absoluteString,
+                                       "paused":true]
+        
+        self.executeMethod(method: "torrent-add", arguments: arguments, callback: { ( obj:[String : Any] ) -> () in
+            
+            print( obj )
+        })
+    }
+    
+    func addTorrent( magnetLink: URL )
+    {
+        addTorrent( url:magnetLink )
     }
     
     func getSession( callback: @escaping (Transmission.Session)-> () )

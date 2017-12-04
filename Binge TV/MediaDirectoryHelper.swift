@@ -26,10 +26,8 @@ class MediaDirectoryHelper : NSObject
         //let helper = MediaDirectoryHelper()
         if let url = displayDirectoryURL
         {
-            print( "url valid: \(url)")
             if let actualURL = self.getActualURL( fromDisplayURL: url )
             {
-                print( "actual \(actualURL)")
                 return MediaDirectoryInfo( actualURL: actualURL, displayURL: url )
             }
         }
@@ -43,7 +41,6 @@ class MediaDirectoryHelper : NSObject
                     url.appendPathComponent(mediaDirectoryName)
                 }
                 let displayURL = self.getDisplayURL(url: url)
-                print( "display \(displayURL )" )
                 rval = MediaDirectoryInfo( actualURL: url, displayURL: displayURL )
             }
         }
@@ -92,27 +89,23 @@ class MediaDirectoryHelper : NSObject
     {
         if( !self.isDirectoryOnMountedVolume( url: url ) )
         {
-            print("not on mounted volume")
             return url
         }
         
         if let volumeBaseURL = self.volumeBaseURL( url: url )
         {
-            print( "volume base url \(volumeBaseURL)" )
             let volumeDisplayName = self.fileManager.displayName(atPath: volumeBaseURL.relativePath)
-            print( "vol display name \(volumeDisplayName)")
+
             var components = url.pathComponents
             let volumeBaseComponents = volumeBaseURL.pathComponents
-            print( components)
             
             components[ volumeBaseComponents.count - 1 ] = volumeDisplayName
             
             var rval = URL( fileURLWithPath: components[0] )
-            print( rval)
+
             for i in 1 ..< components.count
             {
                 rval = rval.appendingPathComponent(components[i])
-                print( rval )
             }
             return rval
         }
@@ -150,24 +143,21 @@ class MediaDirectoryHelper : NSObject
     
     private func volumeBaseURL( url: URL ) -> URL?
     {
-        print( "passed in: \(url)")
         if( !isDirectoryOnMountedVolume( url: url ) )
         {
             return nil
         }
         
-        var components = url.pathComponents
-        print( components)
+        let components = url.pathComponents
         if( components.count < 3 )
         {
             //not enough info in path
             return nil
         }
-        print( "returning" )
-        print(URL(fileURLWithPath: components[0]).appendingPathComponent(components[1]).appendingPathComponent(components[2]))
+
         var u = URL(fileURLWithPath: components[0])
         u = u.appendingPathComponent(components[1]).appendingPathComponent(components[2])
-        print(u )
+
         return u
     }
     
@@ -194,7 +184,7 @@ class MediaDirectoryHelper : NSObject
         //        }
         //        else
         // {
-        print( "modal")
+
         if( panel.runModal() != NSApplication.ModalResponse.OK )
         {
             

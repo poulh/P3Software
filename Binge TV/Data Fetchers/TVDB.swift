@@ -140,6 +140,20 @@ class TVDB : NSObject
         var network : String = ""
         var bannerURL : URL = URL(fileURLWithPath: "")
         var status : String = ""
+        
+        private static let THE : String = "The "
+        private static let THE_LEN : Int = Result.THE.count
+        
+        var sortName : String {
+            get {
+                if( self.name.hasPrefix( Result.THE ) )
+                {
+                    let end = self.name.index( self.name.startIndex, offsetBy: Result.THE_LEN )
+                    return self.name.replacingCharacters(in: ( self.name.startIndex ..< end ), with: "" )
+                }
+                return self.name
+            }
+        }
     }
     
     class Series : Result
@@ -216,7 +230,6 @@ class TVDB : NSObject
                 }
                 return lhs.season_number < rhs.season_number
             })
-           
         }
         
         var genres : [String] = []

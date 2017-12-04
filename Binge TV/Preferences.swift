@@ -17,4 +17,19 @@ let FILENAME_REGEX = "Filename Regex"
 let MEDIA_DIRECTORY_NAME = "Media Directory Name"
 let TRANSMISSION_HOST = "Transmission Host"
 let TRANSMISSION_PORT = "Transmission Port"
+let TRANSMISSION_PATH = "Transmission Path"
 
+extension Transmission
+{
+    convenience init?( defaults: UserDefaults )
+    {
+        guard let host = defaults.string( forKey: TRANSMISSION_HOST ),
+            let path = defaults.string( forKey: TRANSMISSION_PATH )
+            else {
+                return nil
+        }
+        let port = defaults.integer(forKey: TRANSMISSION_PORT )
+        
+        self.init(host: host, port: port, path: path )
+    }
+}

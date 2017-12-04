@@ -135,7 +135,9 @@ class DownloadsManager: NSObject {
         }
         
         var prettyFileName : String {
-            return String(format: "\(self.series) S%02dE%02d.\(self.ext)", seasonNumber, episodeNumber)
+            get {
+                return String(format: "\(self.series) S%02dE%02d.\(self.ext)", seasonNumber, episodeNumber)
+            }
         }
         
         func episodeURL( inDir: URL ) -> URL
@@ -164,22 +166,22 @@ class DownloadsManager: NSObject {
         }
     }
     
-    func seriesDirectoryURL( series: TVDB.Series ) -> URL
+    private func seriesDirectoryURL( series: TVDB.Series ) -> URL
     {
         return self.mediaDirectoryURL.appendingPathComponent(series.name)
     }
     
-    func episodeDirectoryURL( series: TVDB.Series, episode: TVDB.Episode ) -> URL
+    private func episodeDirectoryURL( series: TVDB.Series, episode: TVDB.Episode ) -> URL
     {
         return self.seriesDirectoryURL(series: series).appendingPathComponent(String(format: "Season %02d", episode.season_number))
     }
     
-    func episodeFileName( series: TVDB.Series, episode: TVDB.Episode, ext: String ) -> String
+    private func episodeFileName( series: TVDB.Series, episode: TVDB.Episode, ext: String ) -> String
     {
         return String(format: "\(series.name) S%02dE%02d.\(ext)", episode.season_number, episode.episode_number)
     }
     
-    func directoryExists( url: URL ) -> Bool
+    private func directoryExists( url: URL ) -> Bool
     {
         var isDir : ObjCBool = false
         self.fileManager.fileExists(atPath: url.relativePath, isDirectory: &isDir )
@@ -188,6 +190,7 @@ class DownloadsManager: NSObject {
     
     func addSeries( series: TVDB.Series ) -> Bool
     {
+    
         let url = seriesDirectoryURL(series: series )
         if( self.directoryExists(url: url ) )
         {
@@ -204,10 +207,31 @@ class DownloadsManager: NSObject {
                 return false
             }
         }
+        //only once we create the dir do we add it to the member variable
+        self.tvdbSeries.append( series )
+        self.sortSeries()
+        self.setTVDBSeries()
+        self.catalogDownloads()
+
         return true
     }
     
-    func getEpisodeFileIfCatalogued( series: TVDB.Series, episode: TVDB.Episode, ext: String? = nil ) -> EpisodeFile?
+    func removeSeries( at: Int )
+    {
+        if( at < self.tvdbSeries.count )
+        {
+            self.tvdbSeries.remove(at: at )
+            self.setTVDBSeries()
+        }
+    }
+    
+    private func setTVDBSeries()
+    {
+        let data = NSKeyedArchiver.archivedData(withRootObject: self.tvdbSeries )
+        self.defaults.set( data, forKey: TVDB_SERIES )
+    }
+    
+    private func getEpisodeFileIfCatalogued( series: TVDB.Series, episode: TVDB.Episode, ext: String? = nil ) -> EpisodeFile?
     {
         let episodeDirectoryURL = self.episodeDirectoryURL(series: series, episode: episode)
         let enumerator = fileManager.enumerator(at: episodeDirectoryURL , includingPropertiesForKeys: nil)
@@ -225,7 +249,7 @@ class DownloadsManager: NSObject {
         return nil
     }
     
-    func getEpisodeFileIfDownloaded( series: TVDB.Series, episode: TVDB.Episode ) -> EpisodeFile?
+    private func getEpisodeFileIfDownloaded( series: TVDB.Series, episode: TVDB.Episode ) -> EpisodeFile?
     {
         for episodeFile in self.downloadedEpisodeFiles
         {
@@ -261,7 +285,7 @@ class DownloadsManager: NSObject {
         return ( EpisodeStatus.missing, 0.0 )
     }
     
-    func updateDownloadDirectory()
+    private func updateDownloadDirectory()
     {
         guard let downloadDirectoryURL = self.downloadDirectoryURL
             else {
@@ -284,7 +308,6 @@ class DownloadsManager: NSObject {
     {
         guard let transmission = self.transmission
             else {
-                callback( false, 0 )
                 return
         }
         
@@ -339,13 +362,13 @@ class DownloadsManager: NSObject {
         })
     }
     
-    func catalogDownloads( series: [TVDB.Series] )
+    func catalogDownloads()
     {
         //todo: this function needs some work... very inefficient
         self.updateDownloadDirectory()
         for episodeFile in self.downloadedEpisodeFiles
         {
-            for s in series
+            for s in self.tvdbSeries
             {
                 for e in s.episodes
                 {
@@ -369,11 +392,8 @@ class DownloadsManager: NSObject {
     
     init?( defaults: UserDefaults)
     {
-        print(defaults.object(forKey: MEDIA_ACTUAL_DIRECTORY))
-        print(defaults.url(forKey: MEDIA_ACTUAL_DIRECTORY))
         guard let actualMediaDirectory = defaults.url(forKey: MEDIA_ACTUAL_DIRECTORY )
             else {
-                print("no actual")
                 return nil
         }
         self.mediaDirectoryURL = actualMediaDirectory
@@ -394,6 +414,14 @@ class DownloadsManager: NSObject {
                 return nil
         }
         
+        self.defaults = defaults
+        
+        if let seriesData = UserDefaults.standard.object(forKey: TVDB_SERIES) as? Data,
+            let series = NSKeyedUnarchiver.unarchiveObject(with: seriesData) as? [TVDB.Series]
+        {
+            self.tvdbSeries = series
+        }
+        
         for ext in video_extensions
         {
             EpisodeFile.videoExtensions.insert( ext )
@@ -406,64 +434,203 @@ class DownloadsManager: NSObject {
         
         EpisodeFile.regexes = filename_regex
         
-        if( !self.fileManager.fileExists(atPath: self.mediaDirectoryURL.relativePath ) )
+        do
         {
-            do
-            {
-                try self.fileManager.createDirectory(at: self.mediaDirectoryURL, withIntermediateDirectories: true )
-            }
-            catch
-            {
-                return nil
-            }
+            try self.fileManager.createDirectory(at: self.mediaDirectoryURL, withIntermediateDirectories: true )
         }
+        catch
+        {
+            print("already created")
+            return nil
+        }
+        
+       
+        
+        self.transmission = Transmission( defaults: defaults )
     }
     
-    func setTransmission( transmission: Transmission )
+    deinit
     {
-        self.transmission = transmission
+        self.stopDownloadStatusTimer()
+        self.stopSearchForMissingEpisodesTimer()
     }
     
-    func scheduleTransmissionTimer( callback: @escaping (Int)-> ())
+    private func sortSeries()
+    {
+        self.tvdbSeries.sort( by:{ (lhs:TVDB.Series, rhs:TVDB.Series) -> Bool in
+            return lhs.sortName < rhs.sortName
+        })
+    }
+    
+    func initDownloader( callback: @escaping (Bool) -> () )
+    {
+        guard let transmission = self.transmission
+            else {
+                return
+        }
+
+        transmission.authenticate( callback: { (authenticated: Bool ) -> () in
+            if( authenticated )
+            {
+                print( "transmission authenticated")
+                if let transmission = self.transmission
+                {
+                    transmission.getSession( callback: { (session: Transmission.Session ) -> () in
+                        print( "got transmission session")
+                        self.setDownloadsDirectory(path: session.download_dir)
+                    })
+                }
+            }
+            else
+            {
+                print( "couldn't auth transmission")
+            }
+            callback( authenticated )
+        })
+    }
+
+    func stopDownloadStatusTimer()
     {
         if let transmissionTimer = self.transmissionTimer
         {
+            print("invalidate timer")
             transmissionTimer.invalidate()
         }
+    }
+    
+    func searchForMissingEpisodes()
+    {
+        guard let transmission = self.transmission
+            else {
+                return
+        }
         
-        self.transmissionTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { (timer:Timer) in
+        if( self.downloadSeriesIndex >= self.tvdbSeries.count )
+        {
+            self.downloadSeriesIndex = 0
+            return
+        }
+        
+        let series = self.tvdbSeries[ self.downloadSeriesIndex ]
+        let episode = series.episodes[ self.downloadEpisodeIndex ]
+        
+        self.downloadEpisodeIndex += 1
+        if( self.downloadEpisodeIndex >= series.episodes.count )
+        {
+            self.downloadSeriesIndex = ( self.downloadSeriesIndex + 1 ) % self.tvdbSeries.count
+            self.downloadEpisodeIndex = 0
+        }
+        
+        let (status, _ ) = self.episodeStatus(series: series, episode: episode)
+        
+        if( status == DownloadsManager.EpisodeStatus.missing )
+        {
+            self.eztv.search(series: series.name,
+                             seasonNumber: episode.season_number,
+                             episodeNumber: episode.episode_number,
+                             resolution: EZTV.RESOLUTION_720P,
+                             callback: { ( result:EZTV.Result? ) in
+                                if let result = result
+                                {
+                                    print( "----------" )
+                                    print( result.title )
+                                   // print( result.magnetURL )
+                                    transmission.addTorrent( url: result.downloadURL )
+                                    
+                                }
+            })
+        }
 
+    }
+    
+    func startSearchForMissingEpisodesTimer()
+    {
+        if( self.transmission == nil )
+        {
+            return
+        }
+        
+        self.downloadMissingTimer = Timer(timeInterval: 1, repeats: true) { (timer:Timer) in
+            self.searchForMissingEpisodes()
+        }
+        
+        if let timer = self.downloadMissingTimer
+        {
+            RunLoop.main.add( timer, forMode: RunLoopMode.defaultRunLoopMode)
+        }
+    }
+    
+    func stopSearchForMissingEpisodesTimer()
+    {
+        if let timer = self.downloadMissingTimer
+        {
+            print("invalidate search for missing timer")
+            timer.invalidate()
+        }
+    }
+    
+    func startDownloadStatusTimer( callback: @escaping (Int)-> ())
+    {
+        if( self.transmission == nil )
+        {
+            return
+        }
+
+        self.stopDownloadStatusTimer()
+        
+        self.transmissionTimer = Timer(timeInterval: 5, repeats: true) { (timer:Timer) in
+            print( Date() )
             self.updateTorrents( removeCompleted: true ) { (success:Bool, numRemoved:Int) in
                 if( success )
                 {
-                    DispatchQueue.main.async() {
-                        callback(numRemoved)
+                    if( numRemoved > 0 )
+                    {
+                        self.catalogDownloads()
                     }
+                    callback( numRemoved )
                 }
             }
         }
+
+        if let timer = self.transmissionTimer
+        {
+            timer.fire()
+            RunLoop.main.add( timer, forMode: RunLoopMode.defaultRunLoopMode)
+        }
     }
     
-    func getDownloads() -> [ EpisodeFile ]
+    var episodeFileDownloads : [ EpisodeFile ]
     {
-        return self.downloadingEpisodeFiles + self.downloadedEpisodeFiles
+        get {
+            return self.downloadingEpisodeFiles + self.downloadedEpisodeFiles
+        }
     }
     
-    func setDownloadsDirectory( path: String )
+    private func setDownloadsDirectory( path: String )
     {
         self.downloadDirectoryURL = URL(fileURLWithPath: path )
     }
     
-    let fileManager = FileManager.default
+    var series : [ TVDB.Series ] {
+        get {
+            return self.tvdbSeries
+        }
+    }
     
-    var transmission : Transmission?
-    var downloadingEpisodeFiles : [ EpisodeFile ] = []
-    var transmissionTimer :Timer?
+    private let fileManager = FileManager.default
+    
+    private var transmission : Transmission?
+    private var eztv : EZTV = EZTV()
+    private var tvdbSeries : [TVDB.Series] = []
+    private var downloadSeriesIndex = 0
+    private var downloadEpisodeIndex = 0
+    private var downloadingEpisodeFiles : [ EpisodeFile ] = []
+    private var transmissionTimer : Timer?
+    private var downloadMissingTimer : Timer?
+    private let defaults : UserDefaults
     
     var downloadDirectoryURL : URL?
-    var downloadedEpisodeFiles : [ EpisodeFile ] = []
+    private var downloadedEpisodeFiles : [ EpisodeFile ] = []
     
     let mediaDirectoryURL : URL
-    
-    
 }

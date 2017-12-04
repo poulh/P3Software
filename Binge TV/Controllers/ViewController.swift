@@ -19,7 +19,6 @@ class ViewController: NSViewController {
     @IBOutlet weak var downloadsLabel: NSTextField!
     
     //models
-    var series: [TVDB.Series] = []
     var episodes: [String] = []
     var searchResults: [TVDB.Result] = []
     var episodeFiles : [ DownloadsManager.EpisodeFile ] = []
@@ -33,36 +32,20 @@ class ViewController: NSViewController {
     //data fetchers
     var tvdb: TVDB?
     var eztv: EZTV?
-    var transmission: Transmission?
     var downloadsManager: DownloadsManager?
     
     var window : NSWindow?
     {
         get {
-            if let win = self.view.window
-            {
-                return win
-            }
-            return nil
+            return self.view.window
         }
     }
     var windowController : WindowController?
     {
         get {
-            if let win = self.window
-            {
-                if let wc = win.windowController as? WindowController
-                {
-                    return wc
-                }
-            }
-            return nil
+            return self.window?.windowController as? WindowController
         }
     }
-    
-   
-    
-  
     
     //    func doVpnStuff()
     //    {
@@ -167,33 +150,59 @@ class ViewController: NSViewController {
     }
     
     override func viewWillAppear() {
-        print(" view will appear")
         super.viewWillAppear()
-        if( !self.series.isEmpty )
+        
+        guard let empty = self.downloadsManager?.series.isEmpty
+            else {
+                return
+        }
+        
+        if( !empty )
         {
             self.seriesTableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
         }
     }
     
-    func getTVDBSeries() -> [TVDB.Series]?
-    {
-        guard let seriesData = UserDefaults.standard.object(forKey: TVDB_SERIES) as? Data,
-                    let series = NSKeyedUnarchiver.unarchiveObject(with: seriesData) as? [TVDB.Series]
-                        else {
-                            return nil
-                    }
-                    return series
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        print("------")
+        for ( key, value ) in change!
+        {
+            print ("\(key) : \(value)" )
+        }
+        print("------")
+      
+        initDownloadManager()
     }
     
-    func setTVDBSeries( series: [TVDB.Series] )
+    func initDownloadManager()
     {
-        let data = NSKeyedArchiver.archivedData(withRootObject: series )
-        UserDefaults.standard.set( data, forKey: TVDB_SERIES )
+        guard let downloadsManager = DownloadsManager( defaults: UserDefaults.standard )
+            else {
+                return
+        }
+        
+        downloadsManager.initDownloader { (success: Bool ) in
+            if( success )
+            {
+                downloadsManager.startDownloadStatusTimer(callback: { (downloadsRemoved: Int ) in
+                    DispatchQueue.main.async() {
+                        self.updateDownloadsTableView()
+                    }
+                })
+                
+                downloadsManager.startSearchForMissingEpisodesTimer()
+            }
+        }
+        
+        self.downloadsManager = downloadsManager
+        self.seasonGroupingHelper.reset()
+        self.episodesTableView.reloadData()
     }
     
     override func viewDidLoad()
     {
-        print("view did load")
         super.viewDidLoad()
         
         guard let defaultsPath = Bundle.main.path(forResource: "Defaults", ofType: "plist"),
@@ -206,17 +215,18 @@ class ViewController: NSViewController {
         }
         
         guard let downloadsManagerDict = defaultsProperties.value( forKey: "Downloads Manager") as? NSDictionary,
-            let videoExtensions = downloadsManagerDict.value( forKey: "Video Extensions" ) as? Array<String>,
-            let subtitleExtensions = downloadsManagerDict.value( forKey: "Subtitle Extensions" ) as? Array<String>,
-            let downloadRegexes = downloadsManagerDict.value( forKey: "Filename Regex" ) as? Array<String>,
+            let videoExtensions = downloadsManagerDict.value( forKey: VIDEO_EXTENSIONS ) as? Array<String>,
+            let subtitleExtensions = downloadsManagerDict.value( forKey: SUBTITLE_EXTENSIONS ) as? Array<String>,
+            let downloadRegexes = downloadsManagerDict.value( forKey: FILENAME_REGEX ) as? Array<String>,
             let mediaDirectoryName = downloadsManagerDict.value( forKey: "Media Directory Name" ) as? String,
             let tvdbDict = defaultsProperties.value(forKey: "TVDB") as? NSDictionary,
             let apiKey = tvdbDict.value( forKey: "API Key" ) as? String,
             let userKey = tvdbDict.value( forKey: "User Key" ) as? String,
             let userName = tvdbDict.value( forKey: "User Name" ) as? String,
             let transmissionDict = defaultsProperties.value( forKey: "Downloader" ) as? NSDictionary,
-            let transmissionHost = transmissionDict.value( forKey: "Transmission Host" ) as? String,
-            let transmissionPort = transmissionDict.value( forKey: "Transmission Port" ) as? Int
+            let transmissionHost = transmissionDict.value( forKey: TRANSMISSION_HOST ) as? String,
+            let transmissionPort = transmissionDict.value( forKey: TRANSMISSION_PORT ) as? Int,
+            let transmissionPath = transmissionDict.value( forKey: TRANSMISSION_PATH ) as? String
             else {
                 displayAlert( window: self.window, message: "The file: \(defaultsPath) is corrupt.\n\nPlease contact the developer.", buttonTitle: "Quit", callback: { (success:Bool) in
                     NSApplication.shared.terminate(self)
@@ -224,61 +234,20 @@ class ViewController: NSViewController {
                 return
         }
         
-        
-        UserDefaults.standard.register( defaults: ["Video Extensions" : videoExtensions,
-                                                   "Subtitle Extensions" : subtitleExtensions,
-                                                   "Filename Regex" : downloadRegexes,
+        UserDefaults.standard.register( defaults: [VIDEO_EXTENSIONS : videoExtensions,
+                                                   SUBTITLE_EXTENSIONS : subtitleExtensions,
+                                                   FILENAME_REGEX : downloadRegexes,
                                                    MEDIA_DIRECTORY_NAME : mediaDirectoryName,
-                                                   "Transmission Host" : transmissionHost,
-                                                   "Transmission Port" : transmissionPort ] )
+                                                   TRANSMISSION_HOST : transmissionHost,
+                                                   TRANSMISSION_PORT : transmissionPort,
+                                                   TRANSMISSION_PATH : transmissionPath ] )
 
-        NotificationCenter.default.addObserver(forName: UserDefaults.didChangeNotification, object: nil, queue: nil) { (notification:Notification) in
-            print("defaults changed")
-            
-            guard let downloadsManager = DownloadsManager( defaults: UserDefaults.standard )
-                else {
-                 
-                    return
-            }
-            
-            self.downloadsManager = downloadsManager
-            
-            if let transmission = Transmission(host: transmissionHost, port: transmissionPort)
-            {
-                self.transmission = transmission
-                transmission.authenticate( callback: { (authenticated: Bool ) -> () in
-                    if( authenticated )
-                    {
-                        print( "transmission authenticated")
-                        
-                        downloadsManager.setTransmission(transmission: transmission)
-                        
-                        transmission.getSession( callback: { (session: Transmission.Session ) -> () in
-                            downloadsManager.setDownloadsDirectory(path: session.download_dir)
-                            //downloadsManager.updateDownloadDirectory()
-                            downloadsManager.catalogDownloads(series: self.series )
-                            
-                            DispatchQueue.main.async(){
-                                self.updateDownloadsTableView()
-                            }
-                        })
-                    }
-                    else
-                    {
-                        print( "couldn't auth transmission")
-                    }
-                })
-            }
-            else
-            {
-                print("no transmission")
-            }
-            
-            self.seasonGroupingHelper.reset()
-            self.episodesTableView.reloadData()
-        }
+        let defaults = UserDefaults.standard
         
-     
+        defaults.addObserver(self,
+                             forKeyPath: MEDIA_ACTUAL_DIRECTORY,
+                             options: NSKeyValueObservingOptions(rawValue: NSKeyValueObservingOptions.new.rawValue | NSKeyValueObservingOptions.old.rawValue ),
+                             context: nil)
         
         if let tvdb = TVDB(apiKey: apiKey, userKey: userKey, userName: userName)
         {
@@ -305,8 +274,6 @@ class ViewController: NSViewController {
             
         }
         
-        let defaults = UserDefaults.standard
-        
         guard let mediaDirectoryInfo = self.mediaDirectoryHelper.getMediaDirectoryURL( displayDirectoryURL: defaults.url(forKey: MEDIA_DISPLAY_DIRECTORY ), mediaDirectoryName: defaults.string(forKey: MEDIA_DIRECTORY_NAME )! )
             else {
                 displayAlert( window: self.window, message: "Could Not Create Media Directory", buttonTitle: "Quit", callback: { (success:Bool) in
@@ -318,38 +285,14 @@ class ViewController: NSViewController {
         defaults.set(mediaDirectoryInfo.displayURL, forKey: MEDIA_DISPLAY_DIRECTORY)
         defaults.set(mediaDirectoryInfo.actualURL, forKey: MEDIA_ACTUAL_DIRECTORY )
         
+        initDownloadManager()
+
         if( self.downloadsManager == nil )
         {
             self.displayAlert( window: self.window, message: "Error creating Download Manager.\n\nPlease contact the developer.", buttonTitle: "Quit", callback: { (success:Bool) in
                 NSApplication.shared.terminate(self)
             })
         }
-        
-        if let series = getTVDBSeries()
-        {
-            self.series = series
-        }
-        
-        
-        
-     
-      
-        
-       /*
-        downloadsManager.scheduleTransmissionTimer { (numRemoved:Int) in
-            
-            if( numRemoved > 0 )
-            {
-                downloadsManager.catalogDownloads(series: self.series )
-            }
-            
-            DispatchQueue.main.async(){
-                self.updateDownloadsTableView()
-            }
-        }
-     */
-
-        
     }
     
     func updateDownloadsTableView()
@@ -359,7 +302,7 @@ class ViewController: NSViewController {
                 return
         }
         
-        self.episodeFiles = downloadsManager.getDownloads()
+        self.episodeFiles = downloadsManager.episodeFileDownloads
         self.episodeFiles.sort( by:{ (lhs:DownloadsManager.EpisodeFile, rhs:DownloadsManager.EpisodeFile) -> Bool in
             if( lhs.percentDone == 1.0 && rhs.percentDone == 1.0 )
             {
@@ -377,11 +320,26 @@ class ViewController: NSViewController {
     
     func removeSeries( row: Int )
     {
-        self.series.remove( at: row )
-        setTVDBSeries(series: self.series)
+        guard let downloadsManager = self.downloadsManager
+            else {
+                return
+        }
+        
+        if( row >= downloadsManager.series.count )
+        {
+            return
+        }
+        
+        if( row < 0 )
+        {
+            return
+        }
+        
+        downloadsManager.removeSeries( at: row )
+
         self.seriesTableView.reloadData()
         self.episodesTableView.reloadData()
-        if( self.series.count > 0 )
+        if( downloadsManager.series.count > 0 )
         {
             let newRow = max( row - 1, 0 )
             self.seriesTableView.selectRowIndexes( IndexSet( integer: newRow ), byExtendingSelection: false )
@@ -398,9 +356,14 @@ class ViewController: NSViewController {
     
     func setSelectedSeries( withSeriesId: Int )
     {
-        for i in 0..<self.series.count
+        guard let downloadsManager = self.downloadsManager
+            else {
+                return
+        }
+        
+        for i in 0..<downloadsManager.series.count
         {
-            let series = self.series[i]
+            let series = downloadsManager.series[i]
             if( series.id == withSeriesId )
             {
                 self.seriesTableView.selectRowIndexes(IndexSet(integer: i), byExtendingSelection: false)
@@ -461,40 +424,16 @@ class ViewController: NSViewController {
                 
                 if( downloadsManager.addSeries(series: series ) )
                 {
-                    self.series.append( series )
-                    let THE = "The "
-                    let THE_LEN = THE.count
-                    self.series.sort( by:{ (lhs:TVDB.Series, rhs:TVDB.Series) -> Bool in
-                        var myLhs = lhs.name
-                        var myRhs = rhs.name
-                        if( myLhs.hasPrefix(THE) )
-                        {
-                            let end = myLhs.index(myLhs.startIndex, offsetBy: THE_LEN)
-                            myLhs = myLhs.replacingCharacters(in: (myLhs.startIndex ..< end), with: "")
-                        }
-                        
-                        if( myRhs.hasPrefix(THE) )
-                        {
-                            let end = myRhs.index(myRhs.startIndex, offsetBy: THE_LEN)
-                            myRhs = myRhs.replacingCharacters(in: (myRhs.startIndex ..< end), with: "")
-                        }
-                        
-                        return myLhs < myRhs
-                    })
-                    
-                    self.setTVDBSeries(series: self.series )
-                    
                     self.searchResults = []
                     
-                    
-                    if let windowController = self.windowController
-                    {
-                        windowController.searchField.stringValue = ""
-                    }
+                    self.windowController?.searchField.stringValue = ""
+//                    if let windowController = self.windowController
+//                    {
+//                        windowController.searchField.stringValue = ""
+//                    }
                     
                     self.seriesTableView.reloadData()
                     self.setSelectedSeries(withSeriesId: result.id )
-                    downloadsManager.catalogDownloads(series: self.series )
                     self.downloadsTableView.reloadData()
                 }
             }
@@ -508,14 +447,19 @@ extension ViewController: NSSearchFieldDelegate {
 extension ViewController: NSTableViewDataSource {
     
     func numberOfRows(in tableView: NSTableView) -> Int {
+        guard let downloadsManager = self.downloadsManager
+            else {
+                return 0
+        }
+        
         if( tableView == self.seriesTableView ) {
-            if( self.series.count == 0 )
+            if( downloadsManager.series.count == 0 )
             {
                 
                 let noDataLabel = NSTextView(frame: tableView.bounds )
                 noDataLabel.string = "No Series Added"
             }
-            return self.series.count
+            return downloadsManager.series.count
         }
         else if( tableView == self.episodesTableView) {
             if( self.displaySearchResults == true )
@@ -525,19 +469,25 @@ extension ViewController: NSTableViewDataSource {
             
             if( seriesTableView.selectedRow >= 0 )
             {
-                let series = self.series[ self.seriesTableView.selectedRow ]
+                let series = downloadsManager.series[ self.seriesTableView.selectedRow ]
                 return self.seasonGroupingHelper.numRows( series: series )
             }
             return 0
         }
         else if( tableView == self.downloadsTableView ) {
-            
-            return self.episodeFiles.count
+            let count = self.episodeFiles.count
+            self.downloadsLabel.isHidden = ( count > 0 )
+            return count
         }
         return 0
     }
     
     func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
+        guard let downloadsManager = self.downloadsManager
+            else {
+                return 0
+        }
+        
         if( tableView == self.episodesTableView) {
             if( self.displaySearchResults == true )
             {
@@ -550,7 +500,7 @@ extension ViewController: NSTableViewDataSource {
                 {
                     return 300
                 }
-                let series = self.series[ self.seriesTableView.selectedRow ]
+                let series = downloadsManager.series[ self.seriesTableView.selectedRow ]
                 if( self.seasonGroupingHelper.getEpisode(series: series, row: row) == nil )
                 {
                     return 25
@@ -637,8 +587,6 @@ extension ViewController: NSTableViewDelegate {
                 cell.statusImageView.image = NSImage(named: NSImage.Name.statusUnavailable)
             }
             
-            
-            
             return cell
         }
         return nil
@@ -697,7 +645,7 @@ extension ViewController: NSTableViewDelegate {
                 
                 cell.percentDoneTextField.stringValue = String(format: "%.2f%%", percentDone * 100.0)
                 cell.statusImageView.image = NSImage(named: NSImage.Name(rawValue: downloadsManager.getEpisodeIcon(status: status )) )
-                
+                                
                 let showDownloadingPercent = status == DownloadsManager.EpisodeStatus.downloading
                 cell.percentDoneTextField.isHidden = !showDownloadingPercent
                 cell.percentDoneTextField.isHidden = true
@@ -713,6 +661,11 @@ extension ViewController: NSTableViewDelegate {
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView?
     {
+        guard let downloadsManager = self.downloadsManager
+            else {
+                return nil
+        }
+        
         if let col = tableColumn
         {
             if( tableView == episodesTableView )
@@ -727,14 +680,14 @@ extension ViewController: NSTableViewDelegate {
                 }
                 else if( row == 0 )
                 {
-                    let series = self.series[ seriesTableView.selectedRow ]
+                    let series = downloadsManager.series[ seriesTableView.selectedRow ]
                     return self.makeSeriesCell(series: series, tag: seriesTableView.selectedRow )
                 }
                 else if( seriesTableView.selectedRow >= 0 )
                 {
                     if( col.identifier.rawValue == "EpisodeCellID")
                     {
-                        let series = self.series[ seriesTableView.selectedRow ]
+                        let series = downloadsManager.series[ seriesTableView.selectedRow ]
                         if let episode = self.seasonGroupingHelper.getEpisode(series: series, row: row )
                         {
                             return self.makeEpisodeCell( series: series, episode: episode, tag: row )
@@ -765,7 +718,7 @@ extension ViewController: NSTableViewDelegate {
                 {
                     if( tableView == self.seriesTableView )
                     {
-                        cell.imageView?.image = NSImage(contentsOf: self.series[ row ].bannerURL ) ?? nil
+                        cell.imageView?.image = NSImage(contentsOf: downloadsManager.series[ row ].bannerURL ) ?? nil
                     }
                     else if( tableView == self.downloadsTableView )
                     {
@@ -782,7 +735,7 @@ extension ViewController: NSTableViewDelegate {
             {
                 if( seasonNumber == 0 )
                 {
-                    let series = self.series[ seriesTableView.selectedRow ]
+                    let series = downloadsManager.series[ seriesTableView.selectedRow ]
                     return self.makeSeriesCell(series: series, tag: seriesTableView.selectedRow )
                 }
                 else
@@ -807,7 +760,6 @@ extension ViewController: NSTableViewDelegate {
         if let tableView = notification.object as? NSTableView {
             if( tableView == self.seriesTableView )
             {
-                print( tableView.selectedRow)
                 if( tableView.selectedRow >= 0 )
                 {
                     self.seasonGroupingHelper.reset()
@@ -816,28 +768,7 @@ extension ViewController: NSTableViewDelegate {
                     episodesTableView.scrollRowToVisible(0)
                     episodesTableView.reloadData()
                     
-                    let series = self.series[ tableView.selectedRow ]
-                    
-                    if let eztv = EZTV()
-                    {
-                        self.eztv = eztv
-                        eztv.search(series: series.name,
-                                    seasonNumber: 1, episodeNumber: 1,
-                                    resolution: EZTV.RESOLUTION_720P,
-                            callback: { (results: [EZTV.Result]?) in
-                            guard let results = results
-                                else {
-                                    print("no results")
-                                    return
-                            }
-                            for result in results
-                            {
-                                print("--------")
-                                print( result.title)
-                                print( result.magnetURL)
-                            }
-                        })
-                    }
+
                 }
             }
         }

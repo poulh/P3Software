@@ -48,7 +48,6 @@ class PreferencesViewController: NSViewController {
                 return
         }
         
-        defaults.set( nil, forKey: MEDIA_ACTUAL_DIRECTORY )
         defaults.set( mediaDirectoryInfo.displayURL, forKey: MEDIA_DISPLAY_DIRECTORY )
         defaults.set( mediaDirectoryInfo.actualURL, forKey: MEDIA_ACTUAL_DIRECTORY )
         

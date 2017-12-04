@@ -17,6 +17,8 @@
 		<string>127.0.0.1</string>
 		<key>Transmission Port</key>
 		<integer>9091</integer>
+		<key>Transmission Path</key>
+		<string>transmission/rpc</string>
 	</dict>
 	<key>Downloads Manager</key>
 	<dict>

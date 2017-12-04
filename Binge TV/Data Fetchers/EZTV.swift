@@ -66,12 +66,14 @@ class EZTV: NSObject {
     
     var urlComponents : URLComponents
     
-    init?( host: String = EZTV.HOST)
+    override init()
     {
         self.urlComponents = URLComponents()
         self.urlComponents.scheme = EZTV.API_SCHEME
         self.urlComponents.host = EZTV.HOST
         self.urlComponents.path = "/search/"
+        
+        super.init()
     }
     
     private func fetchData( url: URL, callback: @escaping ( String? )-> () ) {
@@ -102,11 +104,19 @@ class EZTV: NSObject {
     func search( series: String,
                  seasonNumber: Int, episodeNumber: Int,
                  resolution: String = EZTV.RESOLUTION_UNSPECIFIED,
-                 callback: @escaping ([EZTV.Result]?)->() )
+                 callback: @escaping (EZTV.Result?)->() )
     {
         let query = String( format: "\(series) S%02dE%02d \(resolution)", seasonNumber, episodeNumber )
-        print( query )
-        self.search( query:query, callback: callback)
+
+        self.search(query: query) { (results:[EZTV.Result]?) in
+            guard let result = results?.first
+            else {
+                callback( nil )
+                return
+            }
+            
+            callback( result )
+        }
     }
     
     func search( series: String,
@@ -127,7 +137,6 @@ class EZTV: NSObject {
         let strippedQuery = query.removingCharacters(inCharacterSet: CharacterSet.alphanumerics.union(CharacterSet.whitespaces).inverted).trimmingCharacters(in: CharacterSet.whitespaces)
        
         url = url.appendingPathComponent( strippedQuery )
-        print( url )
 
         self.fetchData(url: url) { ( html:String?) in
             guard let html = html,
