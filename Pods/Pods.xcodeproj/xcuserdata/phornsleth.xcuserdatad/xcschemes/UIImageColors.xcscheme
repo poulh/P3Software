@@ -14,10 +14,10 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = 'FF242A10C961799E3E35AE203E6D8AD4'
-               BlueprintName = 'SwiftSoup'
+               BlueprintIdentifier = '282E5705ED93D2644F8B4FA41885F5E4'
+               BlueprintName = 'UIImageColors'
                ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'SwiftSoup.framework'>
+               BuildableName = 'UIImageColors.framework'>
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

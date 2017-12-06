@@ -482,6 +482,7 @@ class Transmission: NSObject {
             args["arguments"] = a
         }
         
+        print( args )
         self.postData( arguments: args, callback: { ( data: Data ) -> () in
             do
             {

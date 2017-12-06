@@ -13,7 +13,6 @@
 		BA566B661FB62F8400ECF0DA /* Transmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA566B651FB62F8400ECF0DA /* Transmission.swift */; };
 		BAA068541FBBD97D00DB1997 /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA068531FBBD97D00DB1997 /* WindowController.swift */; };
 		BAA068561FBCC16500DB1997 /* SearchResultsTableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA068551FBCC16500DB1997 /* SearchResultsTableCellView.swift */; };
-		BAA0685A1FBD459000DB1997 /* ColorAnalyzer.m in Sources */ = {isa = PBXBuildFile; fileRef = BAA068591FBD459000DB1997 /* ColorAnalyzer.m */; };
 		BAA068621FBDEFAF00DB1997 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA068611FBDEFAF00DB1997 /* AppDelegate.swift */; };
 		BAA068641FBDEFAF00DB1997 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA068631FBDEFAF00DB1997 /* MasterViewController.swift */; };
 		BAA068661FBDEFAF00DB1997 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA068651FBDEFAF00DB1997 /* DetailViewController.swift */; };
@@ -59,9 +58,6 @@
 		BA5E64A51FC4E39E008F4F07 /* Risk View.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Risk View.entitlements"; sourceTree = "<group>"; };
 		BAA068531FBBD97D00DB1997 /* WindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
 		BAA068551FBCC16500DB1997 /* SearchResultsTableCellView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchResultsTableCellView.swift; sourceTree = "<group>"; };
-		BAA068571FBD458F00DB1997 /* TvTime-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TvTime-Bridging-Header.h"; sourceTree = "<group>"; };
-		BAA068581FBD459000DB1997 /* ColorAnalyzer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorAnalyzer.h; sourceTree = "<group>"; };
-		BAA068591FBD459000DB1997 /* ColorAnalyzer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColorAnalyzer.m; sourceTree = "<group>"; };
 		BAA0685F1FBDEFAF00DB1997 /* Card Maker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Card Maker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BAA068611FBDEFAF00DB1997 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BAA068631FBDEFAF00DB1997 /* MasterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
@@ -203,7 +199,6 @@
 				BAA068601FBDEFAF00DB1997 /* Card Maker */,
 				BAD429DA1FC3A4AB00B74883 /* Risk View */,
 				BAED9B1D1FAB921A00CD8DA5 /* Products */,
-				BAA068571FBD458F00DB1997 /* TvTime-Bridging-Header.h */,
 				BAA0688F1FBE24DB00DB1997 /* Frameworks */,
 				9A6DD6F7D15DCB49B017A3B0 /* Pods */,
 			);
@@ -222,8 +217,6 @@
 		BAED9B1E1FAB921A00CD8DA5 /* Binge TV */ = {
 			isa = PBXGroup;
 			children = (
-				BAA068581FBD459000DB1997 /* ColorAnalyzer.h */,
-				BAA068591FBD459000DB1997 /* ColorAnalyzer.m */,
 				BA08D8E01FB3D22C000709EA /* EpisodeTableCellView.swift */,
 				BAA068551FBCC16500DB1997 /* SearchResultsTableCellView.swift */,
 				BAED9B1F1FAB921A00CD8DA5 /* AppDelegate.swift */,
@@ -504,10 +497,12 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Binge TV/Pods-Binge TV-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/SwiftSoup/SwiftSoup.framework",
+				"${BUILT_PRODUCTS_DIR}/UIImageColors/UIImageColors.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftSoup.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/UIImageColors.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -585,7 +580,6 @@
 				BAED9B201FAB921A00CD8DA5 /* AppDelegate.swift in Sources */,
 				BA08D8E11FB3D22C000709EA /* EpisodeTableCellView.swift in Sources */,
 				BAD393621FCCF05B0096C094 /* Preferences.swift in Sources */,
-				BAA0685A1FBD459000DB1997 /* ColorAnalyzer.m in Sources */,
 				BAF115461FC2443200681C75 /* EZTV.swift in Sources */,
 				BAA068541FBBD97D00DB1997 /* WindowController.swift in Sources */,
 				BA08D8DB1FB23A6C000709EA /* DownloadsManager.swift in Sources */,
@@ -841,7 +835,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.p3software.bingetv;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "TvTime-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 4.0;
@@ -862,7 +855,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.p3software.bingetv;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "TvTime-Bridging-Header.h";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 4.0;
 			};

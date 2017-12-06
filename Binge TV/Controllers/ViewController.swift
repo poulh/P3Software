@@ -7,7 +7,9 @@
 //
 
 import Cocoa
-import NetworkExtension
+import UIImageColors
+//import NetworkExtension
+
 
 class ViewController: NSViewController {
     
@@ -23,10 +25,10 @@ class ViewController: NSViewController {
     var searchResults: [TVDB.Result] = []
     var episodeFiles : [ DownloadsManager.EpisodeFile ] = []
     var displaySearchResults = false
+    var imageColors :ImageColors?
     
     // view helpers
     let seasonGroupingHelper = SeasonGroupingHelper()
-    var seriesColorAnalyzer : ColorAnalyzer?
     let mediaDirectoryHelper = MediaDirectoryHelper()
         
     //data fetchers
@@ -303,6 +305,19 @@ class ViewController: NSViewController {
         }
         
         self.episodeFiles = downloadsManager.episodeFileDownloads
+        if let column = self.downloadsTableView.tableColumns.first
+        {
+            let count = self.episodeFiles.count
+            if( count == 1 )
+            {
+                column.headerCell.stringValue = "\(count) Download"
+            }
+            else
+            {
+                column.headerCell.stringValue = "\(count) Downloads"
+            }
+        }
+
         self.episodeFiles.sort( by:{ (lhs:DownloadsManager.EpisodeFile, rhs:DownloadsManager.EpisodeFile) -> Bool in
             if( lhs.percentDone == 1.0 && rhs.percentDone == 1.0 )
             {
@@ -545,19 +560,20 @@ extension ViewController: NSTableViewDelegate {
                 if let img = NSImage(contentsOf: result.bannerURL)
                 {
                     cell.imageView?.image = NSImage(contentsOf: result.bannerURL)
-                    
-                    if let analyzer = ColorAnalyzer(image: img )
+                   
+                    self.imageColors = img.getColors()
+                    if let imageColors = self.imageColors
                     {
                         if( tag == 0 )
                         {
-                            episodesTableView.backgroundColor = analyzer.backgroundColor
+                            episodesTableView.backgroundColor = imageColors.background
                         }
-                        cell_layer.backgroundColor = analyzer.backgroundColor.cgColor
+                        cell_layer.backgroundColor = imageColors.background.cgColor
                         
-                        cell.nameTextfield.textColor = analyzer.primaryColor
-                        cell.yearTextfield.textColor = analyzer.primaryColor
-                        cell.overviewTextfield.textColor = analyzer.primaryColor
-                        cell.networkTextfield.textColor = analyzer.primaryColor
+                        cell.nameTextfield.textColor = imageColors.primary
+                        cell.yearTextfield.textColor = imageColors.primary
+                        cell.overviewTextfield.textColor = imageColors.primary
+                        cell.networkTextfield.textColor = imageColors.primary
                     }
                 }
                 else
@@ -599,15 +615,14 @@ extension ViewController: NSTableViewDelegate {
             if let img = NSImage(contentsOf: series.bannerURL)
             {
                 cell.imageView?.image = img
-                if let analyzer = ColorAnalyzer(image: img )
+                self.imageColors = img.getColors()
+                if let imageColors = self.imageColors
                 {
-                    self.seriesColorAnalyzer = analyzer
-                    self.episodesTableView.backgroundColor = analyzer.backgroundColor
+                    self.episodesTableView.backgroundColor = imageColors.background
                 }
             }
             else
             {
-                self.seriesColorAnalyzer = nil //clear it out
                 cell.imageView?.image = NSImage()
                 self.episodesTableView.backgroundColor = NSColor.textBackgroundColor
             }
@@ -700,9 +715,10 @@ extension ViewController: NSTableViewDelegate {
                                 {
                                     
                                     cell.textField?.stringValue = String(format: "Season %02d", seasonNumber )
-                                    if let analyzer = self.seriesColorAnalyzer
+                                    
+                                    if let imageColors = self.imageColors
                                     {
-                                        cell.textField?.textColor = analyzer.primaryColor
+                                        cell.textField?.textColor = imageColors.primary
                                     }
                                     
                                     return cell

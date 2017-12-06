@@ -209,8 +209,10 @@ class DownloadsManager: NSObject {
         }
         //only once we create the dir do we add it to the member variable
         self.tvdbSeries.append( series )
+        
         self.sortSeries()
-        self.setTVDBSeries()
+        self.saveTVDBSeriesData()
+        self.resetSearchIndexes()
         self.catalogDownloads()
 
         return true
@@ -221,11 +223,12 @@ class DownloadsManager: NSObject {
         if( at < self.tvdbSeries.count )
         {
             self.tvdbSeries.remove(at: at )
-            self.setTVDBSeries()
+            self.saveTVDBSeriesData()
+            self.resetSearchIndexes()
         }
     }
     
-    private func setTVDBSeries()
+    private func saveTVDBSeriesData()
     {
         let data = NSKeyedArchiver.archivedData(withRootObject: self.tvdbSeries )
         self.defaults.set( data, forKey: TVDB_SERIES )
@@ -498,6 +501,22 @@ class DownloadsManager: NSObject {
         }
     }
     
+    private func resetSearchIndexes()
+    {
+        let seriesCount = self.tvdbSeries.count
+        if( seriesCount == 0 )
+        {
+            self.downloadSeriesIndex = 0
+            self.downloadEpisodeIndex = 0
+            return
+        }
+        
+        self.downloadSeriesIndex = min( self.downloadSeriesIndex, self.tvdbSeries.count - 1 )
+        
+        let series = self.tvdbSeries[ self.downloadSeriesIndex ]
+        self.downloadEpisodeIndex = max( 0, min( self.downloadEpisodeIndex, series.episodes.count - 1 ) )
+    }
+    
     func searchForMissingEpisodes()
     {
         guard let transmission = self.transmission
@@ -505,13 +524,14 @@ class DownloadsManager: NSObject {
                 return
         }
         
-        if( self.downloadSeriesIndex >= self.tvdbSeries.count )
+        if( self.tvdbSeries.count == 0 )
         {
-            self.downloadSeriesIndex = 0
             return
         }
         
         let series = self.tvdbSeries[ self.downloadSeriesIndex ]
+        
+        
         let episode = series.episodes[ self.downloadEpisodeIndex ]
         
         self.downloadEpisodeIndex += 1
@@ -534,6 +554,7 @@ class DownloadsManager: NSObject {
                                 {
                                     print( "----------" )
                                     print( result.title )
+                                    print( result.downloadURL )
                                    // print( result.magnetURL )
                                     transmission.addTorrent( url: result.downloadURL )
                                     

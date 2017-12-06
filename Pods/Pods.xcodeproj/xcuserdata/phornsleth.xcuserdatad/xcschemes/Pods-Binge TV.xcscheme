@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A5AF7840E00A1D948ACCA55C738568A2"
+               BlueprintIdentifier = "78EB739CF941D50560861686CE463CEF"
                BuildableName = "Pods_Binge_TV.framework"
                BlueprintName = "Pods-Binge TV"
                ReferencedContainer = "container:Pods.xcodeproj">
@@ -47,7 +47,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "A5AF7840E00A1D948ACCA55C738568A2"
+            BlueprintIdentifier = "78EB739CF941D50560861686CE463CEF"
             BuildableName = "Pods_Binge_TV.framework"
             BlueprintName = "Pods-Binge TV"
             ReferencedContainer = "container:Pods.xcodeproj">

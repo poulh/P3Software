@@ -8,7 +8,7 @@ platform :osx, '10.12'
 
   # Pods for Binge TV
   pod "SwiftSoup"
-
+  pod "UIImageColors", :git => 'https://github.com/poulh/UIImageColors.git'
 end
 
 target 'Card Maker' do
