@@ -1083,14 +1083,14 @@ CA
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
-                            <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="H1U-vz-KqI" userLabel="Downloads Scroll View">
+                            <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="49" horizontalPageScroll="10" verticalLineScroll="49" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="H1U-vz-KqI" userLabel="Downloads Scroll View">
                                 <rect key="frame" x="0.0" y="0.0" width="301" height="250"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <clipView key="contentView" ambiguous="YES" drawsBackground="NO" copiesOnScroll="NO" id="LDf-bD-6Di">
                                     <rect key="frame" x="1" y="0.0" width="299" height="249"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="aV8-vo-iJg" viewBased="YES" id="q09-1C-vm4">
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="47" rowSizeStyle="automatic" headerView="aV8-vo-iJg" viewBased="YES" id="q09-1C-vm4">
                                             <rect key="frame" x="0.0" y="0.0" width="299" height="226"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
@@ -1110,12 +1110,16 @@ CA
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES"/>
                                                     <prototypeCellViews>
-                                                        <tableCellView id="sch-BK-aP6">
-                                                            <rect key="frame" x="1" y="1" width="296" height="17"/>
+                                                        <tableCellView id="sch-BK-aP6" customClass="DownloadStatusCellView" customModule="Binge_TV" customModuleProvider="target">
+                                                            <rect key="frame" x="1" y="1" width="296" height="47"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
+                                                                <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="dPh-JQ-OY1">
+                                                                    <rect key="frame" x="0.0" y="-2" width="293" height="20"/>
+                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                </progressIndicator>
                                                                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Jg4-cm-dy2">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="296" height="17"/>
+                                                                    <rect key="frame" x="1" y="25" width="294" height="19"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="YIc-8C-ZPi">
                                                                         <font key="font" metaFont="system"/>
@@ -1125,6 +1129,7 @@ CA
                                                                 </textField>
                                                             </subviews>
                                                             <connections>
+                                                                <outlet property="progressIndicator" destination="dPh-JQ-OY1" id="jFQ-dm-ttv"/>
                                                                 <outlet property="textField" destination="Jg4-cm-dy2" id="kcc-1w-e19"/>
                                                             </connections>
                                                         </tableCellView>
@@ -1140,7 +1145,7 @@ CA
                                     <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
                                 </clipView>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="HXD-3b-OFW">
-                                    <rect key="frame" x="1" y="-15" width="0.0" height="16"/>
+                                    <rect key="frame" x="1" y="7" width="0.0" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="9qq-bg-N2N">

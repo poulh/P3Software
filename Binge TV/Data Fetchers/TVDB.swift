@@ -156,7 +156,7 @@ class TVDB : NSObject
         }
     }
     
-    class Series : Result
+    @objc(_TtCC8Binge_TV4TVDB7Series)class Series : Result
     {
         override init?( json: [String:Any])
         {

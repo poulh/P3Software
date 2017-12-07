@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   type = "0"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Binge TV/Data Fetchers/TVDB.swift"
+            timestampString = "534371030.105473"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "76"
+            endingLineNumber = "76"
+            landmarkName = "Result"
+            landmarkType = "3">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Binge_TV.TVDB.Result.__allocating_init() -&gt; Binge_TV.TVDB.Result"
+                  moduleName = "Binge TV"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/phornsleth/Documents/git/P3Software/Binge%20TV/Data%20Fetchers/TVDB.swift"
+                  timestampString = "534284889.016397"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "4">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Binge_TV.TVDB.Result.init() -&gt; Binge_TV.TVDB.Result"
+                  moduleName = "Binge TV"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/phornsleth/Documents/git/P3Software/Binge%20TV/Data%20Fetchers/TVDB.swift"
+                  timestampString = "534284889.018175"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "75"
+                  endingLineNumber = "75"
+                  offsetFromSymbolStart = "8">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

@@ -29,26 +29,6 @@
       language = ""
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BAED9B2C1FAB921B00CD8DA5"
-               BuildableName = "TvTimeTests.xctest"
-               BlueprintName = "TvTimeTests"
-               ReferencedContainer = "container:P3Software.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BAED9B371FAB921B00CD8DA5"
-               BuildableName = "TvTimeUITests.xctest"
-               BlueprintName = "TvTimeUITests"
-               ReferencedContainer = "container:P3Software.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference

@@ -10,7 +10,6 @@ import Cocoa
 import UIImageColors
 //import NetworkExtension
 
-
 class ViewController: NSViewController {
     
     @IBOutlet weak var seriesTableView: NSTableView!
@@ -202,7 +201,6 @@ class ViewController: NSViewController {
         self.seasonGroupingHelper.reset()
         self.episodesTableView.reloadData()
     }
-    
     override func viewDidLoad()
     {
         super.viewDidLoad()
@@ -250,6 +248,24 @@ class ViewController: NSViewController {
                              forKeyPath: MEDIA_ACTUAL_DIRECTORY,
                              options: NSKeyValueObservingOptions(rawValue: NSKeyValueObservingOptions.new.rawValue | NSKeyValueObservingOptions.old.rawValue ),
                              context: nil)
+        
+       
+
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: nil) { (notificaton:Notification) in
+        
+            self.initDownloadManager()
+        }
+        
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: nil) { (notificaton:Notification) in
+            
+            if let downloadsManager = self.downloadsManager
+            {
+                downloadsManager.stopAllTimers()
+            }
+            self.downloadsManager = nil
+        }
+        
+        
         
         if let tvdb = TVDB(apiKey: apiKey, userKey: userKey, userName: userName)
         {
@@ -442,11 +458,7 @@ class ViewController: NSViewController {
                     self.searchResults = []
                     
                     self.windowController?.searchField.stringValue = ""
-//                    if let windowController = self.windowController
-//                    {
-//                        windowController.searchField.stringValue = ""
-//                    }
-                    
+               
                     self.seriesTableView.reloadData()
                     self.setSelectedSeries(withSeriesId: result.id )
                     self.downloadsTableView.reloadData()
@@ -730,20 +742,27 @@ extension ViewController: NSTableViewDelegate {
             }
             else
             {
-                if let cell = tableView.makeView(withIdentifier: col.identifier, owner: nil) as? NSTableCellView
+                if( tableView == self.seriesTableView )
                 {
-                    if( tableView == self.seriesTableView )
+                    if let cell = tableView.makeView(withIdentifier: col.identifier, owner: nil) as? NSTableCellView
                     {
                         cell.imageView?.image = NSImage(contentsOf: downloadsManager.series[ row ].bannerURL ) ?? nil
+                        return cell
                     }
-                    else if( tableView == self.downloadsTableView )
+                }
+                else if( tableView == self.downloadsTableView )
+                {
+                    if let cell = tableView.makeView(withIdentifier: col.identifier, owner: nil) as? DownloadStatusCellView
                     {
                         let episodeFile = self.episodeFiles[ row ]
-                        cell.textField?.stringValue = episodeFile.prettyFileName + " ( \(episodeFile.percentDone * 100.0)% )"
+                        cell.textField?.stringValue = episodeFile.prettyFileName
+                        cell.progressIndicator.doubleValue = episodeFile.percentDone * 100.0
+                        return cell
                     }
-                    return cell
                 }
+                
             }
+            
         }
         else
         {

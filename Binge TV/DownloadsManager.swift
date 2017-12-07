@@ -18,13 +18,13 @@ class DownloadsManager: NSObject {
     class EpisodeFile : NSObject
     {
         static var regexes : [String] = []
-        static var downloadComplete : Float = 1.0
-        static var downloadNotStarted : Float = 0.0
+        static var downloadComplete : Double = 1.0
+        static var downloadNotStarted : Double = 0.0
         static var videoExtensions : Set<String> = []
         static var subtitleExtensions : Set<String> = []
        // static var fileExtensions : Set<String> = []
         
-        init?( url:URL, withPercent: Float )
+        init?( url:URL, withPercent: Double )
         {
            // print("EpisodeFile: \(url)")
             if( withPercent < EpisodeFile.downloadNotStarted || withPercent > EpisodeFile.downloadComplete )
@@ -109,7 +109,7 @@ class DownloadsManager: NSObject {
         let series : String
         let seasonNumber : Int
         let episodeNumber : Int
-        let percentDone : Float
+        let percentDone : Double
         let url : URL
         
         var path : String {
@@ -264,7 +264,7 @@ class DownloadsManager: NSObject {
         return nil
     }
     
-    func episodeStatus( series: TVDB.Series, episode: TVDB.Episode ) -> ( EpisodeStatus, Float )
+    func episodeStatus( series: TVDB.Series, episode: TVDB.Episode ) -> ( EpisodeStatus, Double )
     {
         
         if let _ = self.getEpisodeFileIfCatalogued( series: series, episode: episode )
@@ -452,10 +452,16 @@ class DownloadsManager: NSObject {
         self.transmission = Transmission( defaults: defaults )
     }
     
-    deinit
+    func stopAllTimers()
     {
         self.stopDownloadStatusTimer()
         self.stopSearchForMissingEpisodesTimer()
+    }
+    
+    deinit
+    {
+        print("stopping timers")
+        self.stopAllTimers()
     }
     
     private func sortSeries()
@@ -552,9 +558,9 @@ class DownloadsManager: NSObject {
                              callback: { ( result:EZTV.Result? ) in
                                 if let result = result
                                 {
-                                    print( "----------" )
-                                    print( result.title )
-                                    print( result.downloadURL )
+                                //    print( "----------" )
+                                //    print( result.title )
+                                //    print( result.downloadURL )
                                    // print( result.magnetURL )
                                     transmission.addTorrent( url: result.downloadURL )
                                     
@@ -599,8 +605,8 @@ class DownloadsManager: NSObject {
 
         self.stopDownloadStatusTimer()
         
-        self.transmissionTimer = Timer(timeInterval: 5, repeats: true) { (timer:Timer) in
-            print( Date() )
+        self.transmissionTimer = Timer(timeInterval: 1, repeats: true) { (timer:Timer) in
+
             self.updateTorrents( removeCompleted: true ) { (success:Bool, numRemoved:Int) in
                 if( success )
                 {

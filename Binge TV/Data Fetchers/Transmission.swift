@@ -197,7 +197,7 @@ class Transmission: NSObject {
                 let isFinished = json["isFinished"] as? Bool  ?? diagnose(),
                 let leftUntilDone = json["leftUntilDone"] as? Int  ?? diagnose(),
                 let name = json["name"] as? String  ?? diagnose(),
-                let percentDone = json["percentDone"] as? Float  ?? diagnose(),
+                let percentDone = json["percentDone"] as? Double  ?? diagnose(),
                 let rateDownload = json["rateDownload"] as? Int  ?? diagnose(),
                 let rateUpload = json["rateUpload"] as? Int  ?? diagnose(),
                 let seedRatioLimit = json["seedRatioLimit"] as? Int  ?? diagnose(),
@@ -257,7 +257,7 @@ class Transmission: NSObject {
         var isFinished: Bool = false
         var leftUntilDone: Int = 0
         var name: String = ""
-        var percentDone: Float = 0.0
+        var percentDone: Double = 0.0
         var rateDownload: Int = 0
         var rateUpload: Int = 0
         var seedRatioLimit: Int = 0
@@ -369,8 +369,6 @@ class Transmission: NSObject {
         arguments["ids"] = ids
         
         self.executeMethod(method: "torrent-remove", arguments: arguments, callback: { ( obj:[String : Any] ) -> () in
-            print( "done remove ")
-            print( obj )
             callback( true )
             return
         })
@@ -410,8 +408,6 @@ class Transmission: NSObject {
                                        "paused":true]
         
         self.executeMethod(method: "torrent-add", arguments: arguments, callback: { ( obj:[String : Any] ) -> () in
-            
-            print( obj )
         })
     }
     
@@ -482,7 +478,6 @@ class Transmission: NSObject {
             args["arguments"] = a
         }
         
-        print( args )
         self.postData( arguments: args, callback: { ( data: Data ) -> () in
             do
             {

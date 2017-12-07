@@ -10,6 +10,7 @@
 		A1304D1A3966CEC60B848E54 /* Pods_Risk_View.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16B9F70EB54EA8F4F70315F6 /* Pods_Risk_View.framework */; };
 		BA08D8DB1FB23A6C000709EA /* DownloadsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA08D8DA1FB23A6C000709EA /* DownloadsManager.swift */; };
 		BA08D8E11FB3D22C000709EA /* EpisodeTableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA08D8E01FB3D22C000709EA /* EpisodeTableCellView.swift */; };
+		BA49BB3C1FD9D72500798054 /* DownloadStatusCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA49BB3B1FD9D72500798054 /* DownloadStatusCellView.swift */; };
 		BA566B661FB62F8400ECF0DA /* Transmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA566B651FB62F8400ECF0DA /* Transmission.swift */; };
 		BAA068541FBBD97D00DB1997 /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA068531FBBD97D00DB1997 /* WindowController.swift */; };
 		BAA068561FBCC16500DB1997 /* SearchResultsTableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA068551FBCC16500DB1997 /* SearchResultsTableCellView.swift */; };
@@ -54,6 +55,8 @@
 		BA08D8DA1FB23A6C000709EA /* DownloadsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadsManager.swift; sourceTree = "<group>"; };
 		BA08D8E01FB3D22C000709EA /* EpisodeTableCellView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EpisodeTableCellView.swift; sourceTree = "<group>"; };
 		BA08D9161FB4DE32000709EA /* RiskView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RiskView.swift; sourceTree = "<group>"; };
+		BA49BB2B1FD9C86F00798054 /* Movie Rename.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Movie Rename.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BA49BB3B1FD9D72500798054 /* DownloadStatusCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadStatusCellView.swift; sourceTree = "<group>"; };
 		BA566B651FB62F8400ECF0DA /* Transmission.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transmission.swift; sourceTree = "<group>"; };
 		BA5E64A51FC4E39E008F4F07 /* Risk View.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Risk View.entitlements"; sourceTree = "<group>"; };
 		BAA068531FBBD97D00DB1997 /* WindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
@@ -92,6 +95,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		BA49BB281FD9C86F00798054 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BAA0685C1FBDEFAF00DB1997 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -210,6 +220,7 @@
 				BAED9B1C1FAB921A00CD8DA5 /* Binge TV.app */,
 				BAA0685F1FBDEFAF00DB1997 /* Card Maker.app */,
 				BAD429D91FC3A4AB00B74883 /* Risk View.app */,
+				BA49BB2B1FD9C86F00798054 /* Movie Rename.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -218,6 +229,7 @@
 			isa = PBXGroup;
 			children = (
 				BA08D8E01FB3D22C000709EA /* EpisodeTableCellView.swift */,
+				BA49BB3B1FD9D72500798054 /* DownloadStatusCellView.swift */,
 				BAA068551FBCC16500DB1997 /* SearchResultsTableCellView.swift */,
 				BAED9B1F1FAB921A00CD8DA5 /* AppDelegate.swift */,
 				BAD393651FCD06600096C094 /* Controllers */,
@@ -238,6 +250,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		BA49BB2A1FD9C86F00798054 /* Movie Rename */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BA49BB381FD9C86F00798054 /* Build configuration list for PBXNativeTarget "Movie Rename" */;
+			buildPhases = (
+				BA49BB271FD9C86F00798054 /* Sources */,
+				BA49BB281FD9C86F00798054 /* Frameworks */,
+				BA49BB291FD9C86F00798054 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Movie Rename";
+			productName = "Movie Rename";
+			productReference = BA49BB2B1FD9C86F00798054 /* Movie Rename.app */;
+			productType = "com.apple.product-type.application";
+		};
 		BAA0685E1FBDEFAF00DB1997 /* Card Maker */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BAA068861FBDEFB000DB1997 /* Build configuration list for PBXNativeTarget "Card Maker" */;
@@ -308,6 +337,11 @@
 				LastUpgradeCheck = 0910;
 				ORGANIZATIONNAME = "Poul Hornsleth";
 				TargetAttributes = {
+					BA49BB2A1FD9C86F00798054 = {
+						CreatedOnToolsVersion = 9.1;
+						DevelopmentTeam = 4KU6579QH8;
+						ProvisioningStyle = Automatic;
+					};
 					BAA0685E1FBDEFAF00DB1997 = {
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = 4KU6579QH8;
@@ -355,11 +389,19 @@
 				BAED9B1B1FAB921A00CD8DA5 /* Binge TV */,
 				BAA0685E1FBDEFAF00DB1997 /* Card Maker */,
 				BAD429D81FC3A4AB00B74883 /* Risk View */,
+				BA49BB2A1FD9C86F00798054 /* Movie Rename */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		BA49BB291FD9C86F00798054 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BAA0685D1FBDEFAF00DB1997 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -545,6 +587,13 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		BA49BB271FD9C86F00798054 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BAA0685B1FBDEFAF00DB1997 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -578,6 +627,7 @@
 				BAD393641FCD06590096C094 /* PreferencesViewController.swift in Sources */,
 				BA566B661FB62F8400ECF0DA /* Transmission.swift in Sources */,
 				BAED9B201FAB921A00CD8DA5 /* AppDelegate.swift in Sources */,
+				BA49BB3C1FD9D72500798054 /* DownloadStatusCellView.swift in Sources */,
 				BA08D8E11FB3D22C000709EA /* EpisodeTableCellView.swift in Sources */,
 				BAD393621FCCF05B0096C094 /* Preferences.swift in Sources */,
 				BAF115461FC2443200681C75 /* EZTV.swift in Sources */,
@@ -633,6 +683,48 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		BA49BB391FD9C86F00798054 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "Movie Rename/Movie_Rename.entitlements";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 4KU6579QH8;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = "Movie Rename/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				PRODUCT_BUNDLE_IDENTIFIER = "come.p3software.Movie-Rename";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+			};
+			name = Debug;
+		};
+		BA49BB3A1FD9C86F00798054 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "Movie Rename/Movie_Rename.entitlements";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 4KU6579QH8;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = "Movie Rename/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				PRODUCT_BUNDLE_IDENTIFIER = "come.p3software.Movie-Rename";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+			};
+			name = Release;
+		};
 		BAA068871FBDEFB000DB1997 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0E2ED775C9A4B0D408138D8C /* Pods-Card Maker.debug.xcconfig */;
@@ -863,6 +955,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		BA49BB381FD9C86F00798054 /* Build configuration list for PBXNativeTarget "Movie Rename" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BA49BB391FD9C86F00798054 /* Debug */,
+				BA49BB3A1FD9C86F00798054 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		BAA068861FBDEFB000DB1997 /* Build configuration list for PBXNativeTarget "Card Maker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
