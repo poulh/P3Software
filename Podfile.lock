@@ -1,24 +1,32 @@
 PODS:
+  - GMIRCClient (0.1.0)
   - SwiftSoup (1.5.8)
   - UIImageColors (1.4.0)
 
 DEPENDENCIES:
+  - GMIRCClient (from `https://github.com/poulh/GMIRCClient.git`)
   - SwiftSoup
   - UIImageColors (from `https://github.com/poulh/UIImageColors.git`)
 
 EXTERNAL SOURCES:
+  GMIRCClient:
+    :git: https://github.com/poulh/GMIRCClient.git
   UIImageColors:
     :git: https://github.com/poulh/UIImageColors.git
 
 CHECKOUT OPTIONS:
+  GMIRCClient:
+    :commit: 9075763b1fe4ee5eff78e5e8c4d22dffad5389c7
+    :git: https://github.com/poulh/GMIRCClient.git
   UIImageColors:
     :commit: 068fc29086b1069faf5ffdb90468e57a29c2bfa3
     :git: https://github.com/poulh/UIImageColors.git
 
 SPEC CHECKSUMS:
+  GMIRCClient: 6a1236376cfce1c9421459bf2254d2be9754dddf
   SwiftSoup: 86a1f5ad07b7e3d14ab1a9324a58c75ae2215e79
   UIImageColors: 6239f080f09050c7329773f2f50fecdc4f92877d
 
-PODFILE CHECKSUM: c35ed4533cc91f7bd3f1cbdafa4374e824888a30
+PODFILE CHECKSUM: ce3c6d2dc8e3848df7bfc4139db5150e14bed9fe
 
 COCOAPODS: 1.3.1
